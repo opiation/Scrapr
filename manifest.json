@@ -1,0 +1,23 @@
+{
+    "name" : "URL Scraper",
+    "description" : "Uses asynchronous XHRs through Promise objects with XPath to scrape URLs for data",
+    "version" : "0.1",
+    "manifest_version" : 2,
+    
+    "content_scripts" : [
+        {
+            "matches" : ["*://*/*"],
+            "js" : [
+                "js/ng.js",
+                "js/ajax.js",
+                "js/Pather.js",
+                "js/scraper.js"
+            ]
+        }
+    ],
+    
+    "permissions" : [
+        "tabs",
+        "*://*/*"
+    ]
+}
