@@ -1,34 +1,34 @@
 /*
     Requires:
-    
-    
+
+
     Array
     Array.prototype.indexOf
-    
+
     console.warn
-    
+
     Error
-    
+
     Number.isNaN (ng module)
     Number.parseInt (ng module)
-    
+
     Object.isBottom (ng module)
-    
+
     Promise
     Promise.prototype.then
-    
+
     String
     String.isString (ng module)
     String.prototype.format (ng module)
     String.prototype.toLowerCase
     String.prototype.toUpperCase
     String.prototype.trim
-    
+
     TypeError
-    
+
     window.isNaN
     window.parseInt
-    
+
     XMLHttpRequest
     - onerror
     - onload
@@ -45,7 +45,7 @@
 (function (exported)
 {
     "use strict";
-    
+
     var acceptableHttpRequestMethods = [
         "DELETE",
         "GET",
@@ -61,11 +61,11 @@
         "json",
         "text"
     ],
-    
+
     defaultHttpRequestMethod = "GET",
     defaultHttpRequestTimeout = 10000, // 10 seconds
     defaultHttpResponseType = "", // default if not set according to MDN
-    
+
     // Console messages use String.prototype.format to template in arguments to send to console
     messages = {
         configBottom : "config for ajax request is null or undefined",
@@ -87,9 +87,9 @@
         httpResponseTypeDefault : "Defaulting to {0} HTTP response type",
         httpResponseTypeUnacceptable : "{0} is not a valid HTTP reponse type\nPlease use one of the following standard HTTP response types:\n{1}"
     };
-    
-    
-    
+
+
+
     function validateHttpRequestMethod(method)
     {
         if (Object.isBottom(method))
@@ -97,23 +97,23 @@
             ng.warn(messages.httpRequestMethodBottom);
             return false;
         }
-        
+
         if (!String.isString(method))
         {
             method = method.toString.trim();
         }
-        
+
         method = method.toUpperCase();
-        
+
         if (acceptableHttpRequestMethods.indexOf(method) < 0)
         {
             ng.warn(messages.httpRequestMethodUnacceptable.format(method, acceptableHttpRequestMethods.join(", ")));
             return false;
         }
-        
+
         return true;
     }
-    
+
     function validateHttpRequestTimeout(milliseconds)
     {
         if (Number.isNaN(milliseconds))
@@ -121,18 +121,18 @@
             ng.warn(messages.httpRequestTimeoutNaN.format(milliseconds));
             return false;
         }
-        
+
         milliseconds = Number.parseInt(milliseconds, 10);
-        
+
         if (milliseconds < 0)
         {
             ng.warn(messages.httpRequestTimeoutMinimum.format(milliseconds));
             return false;
         }
-        
+
         return true;
     }
-    
+
     function validateHttpRequestURL(url)
     {
         if (Object.isBottom(url))
@@ -140,21 +140,21 @@
             ng.warn(messages.httpRequestURLBottom);
             return false;
         }
-        
+
         if (!String.isString(url))
         {
             url = url.toString().trim();
         }
-        
+
         if (/* url fails regex uri test */ false)
         {
             ng.warn(messages.httpRequestURLInvalid.format(url));
             return false;
         }
-        
+
         return true;
     }
-    
+
     function validateHttpResponseType(type)
     {
         if (Object.isBottom(type))
@@ -162,109 +162,108 @@
             ng.warn(messages.httpResponseTypeBottom);
             return false;
         }
-        
+
         if (!String.isString(type))
         {
             type = type.toString().trim();
         }
-        
+
         type = type.toLowerCase();
-        
+
         if (acceptableHttpResponseTypes.indexOf(type) < 0)
         {
             ng.warn(messages.httpResponseTypeUnacceptable.format(type, acceptableHttpResponseTypes.join(", ")));
             return false;
         }
-        
+
         return true;
     }
-    
-    
-    
+
+
+
     function validateOrDefaultHttpRequestMethod(method)
     {
         if (validateHttpRequestMethod(method))
         {
             return method.toString().trim().toUpperCase();
         }
-        
+
         ng.log(messages.httpRequestMethodDefault.format(defaultHttpRequestMethod));
         return defaultHttpRequestMethod;
     }
-    
+
     function validateOrDefaultHttpRequestTimeout(milliseconds)
     {
         if (validateHttpRequestTimeout(milliseconds))
         {
             return Number.parseInt(milliseconds, 10);
         }
-        
+
         ng.log(message.httpRequestTimeoutDefault.format(defaultHttpRequestTimeout));
         return defaultHttpRequestTimeout;
     }
-    
+
     function validateOrDefaultHttpResponseType(type)
     {
         if (validateHttpResponseType(type))
         {
             return type.toString().trim().toLowerCase();
         }
-        
+
         ng.log(messages.httpResponseTypeDefault.format(defaultHttpResponseType));
         return defaultHttpResponseType;
     }
-    
+
     function validateConfig(config)
     {
         if (Object.isBottom(config))
         {
             throw new TypeError(messages.configBottom);
         }
-        
+
         if (!validateHttpRequestURL(config.url))
         {
             throw new TypeError(messages.configURLInvalid(config.url));
         }
-        
+
         config.method = validateOrDefaultHttpRequestMethod(config.method);
         config.repsonseType = validateOrDefaultHttpResponseType(config.responseType);
         config.timeout = validateOrDefaultHttpRequestTimeout(config.timeout);
-        
+
         if (Object.isObject(config.onprogress) && !Function.isFunction(config.onprogress))
         {
             ng.warn(messages.configOnProgressNotFunction);
             delete config.onprogress;
         }
-        
+
         return config;
     }
-    
+
     function ajax(config)
     {
-        
+
         // Validate [config] object and various properties
         config = validateConfig(config);
 
-        
-        
+
+
         function executor(resolvePromise, rejectPromise)
         {
             var xhr = new XMLHttpRequest();
-            
-            
-            
+
+
+
             function errorEvent(message)
             {
                 message = String.isString(message) ? message : xhr.statusText;
                 ng.warn(message);
                 rejectPromise(message);
             }
-            
+
             function loadEvent()
             {
                 if (Number.parseInt(xhr.status, 10) === 200)
                 {
-                    ng.log(messages.httpRequestSuccess.format(config.url, xhr.response));
                     resolvePromise(xhr.response);
                 }
                 else
@@ -272,43 +271,43 @@
                     errorEvent(messages.httpRequestFailure.format(config.url, xhr.status, xhr.statusText));
                 }
             }
-            
+
             function progressEvent(event)
             {
                 var progress;
-                
+
                 if (event.lengthComputable)
                 {
                     progress = event.loaded / event.total * 100;
                     ng.log(messages.httpRequestProgress.format(progress.toFixed(2)));
-                    
+
                     if (Function.isFunction(config.onprogress))
                     {
                         config.onprogress.call(xhr, event);
                     }
                 }
             }
-            
+
             function successEvent()
             {
                 if (window.parseInt(xhr.status, 10) === 200)
                 {
                     resolvePromise(xhr.response);
                 }
-                
+
                 else
                 {
                     rejectPromise(xhr.statusText);
                 }
             }
-            
+
             function timeoutEvent()
             {
                 errorEvent(messages.httpRequestTimedOut.format(config.url, config.timeout));
             }
-            
-            
-            
+
+
+
             xhr.onload = loadEvent;
             xhr.onerror = errorEvent;
             xhr.onprogress = progressEvent;
@@ -318,16 +317,16 @@
             xhr.responseType = config.responseType;
             xhr.send();
         }
-        
-        
-        
+
+
+
         return new Promise(executor);
     }
-    
-    
-    
+
+
+
     Object.defineProperties(ajax, {
-        
+
         "defaultHttpRequestMethod" : {
             "enumerable" : true,
             "get" : function () { return defaultHttpRequestMethod; },
@@ -342,7 +341,7 @@
                 }
             }
         },
-        
+
         "defaultHttpRequestTimeout" : {
             "enumerable" : true,
             "get" : function () { return defaultHttpRequestTimeout; },
@@ -357,7 +356,7 @@
                 }
             }
         },
-        
+
         "defaultHttpResponseType" : {
             "enumerable" : true,
             "get" : function () { return defaultHttpResponseType; },
@@ -373,10 +372,10 @@
             }
         }
     });
-    
-    
-    
+
+
+
     exported.ajax = ajax;
-    
+
     return exported;
 }(ng));

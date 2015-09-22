@@ -60,7 +60,7 @@ var url = "https://stackoverflow.com/questions/tagged/google-app-engine";
     }
 };*/
 
-var path = "//head/title[1]/text()";
+var path = "string(//head/title[1]/text())";
 
 
 Scrapr.scrape(url, path).then(ng.log);
