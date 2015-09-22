@@ -7,7 +7,7 @@
 
 var Scrapr = (function (exported) {
     "use strict";
-    
+
     function scrape(config, xpath)
     {
         config = !String.isString(config) ? url : {
@@ -16,24 +16,24 @@ var Scrapr = (function (exported) {
             "timeout" : 10000,
             "url" : config
         };
-        
+
         function executor(resolve, reject)
         {
             function resolver(doc)
             {
                 resolve(ng.resolveXPath(doc, doc, xpath));
             }
-            
+
             ng.ajax(config).then(resolver, reject);
         }
-        
+
         return new Promise(executor);
     }
-    
-    
-    
+
+
+
     exported.scrape = scrape;
-    
+
     return exported;
 }(Object.create(null)));
 
