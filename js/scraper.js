@@ -1,8 +1,7 @@
 /*
-    Requires
-    ng.js
-    ajax.js
-    Pather.js
+    require("ng");
+    require("ajax");
+    require("Pather.js");
 */
 
 var Scrapr = (function (exported) {
@@ -39,14 +38,8 @@ var Scrapr = (function (exported) {
 
 
 
-var req = {
-    "url" : "http://stackoverflow.com/questions/tagged/google-app-engine",
-    "method" : "GET",
-    "timeout" : 5000,
-    "responseType" : "document"
-};
-
-var url = "https://stackoverflow.com/questions/tagged/google-app-engine";
+var currentPageURL = window.location.href;
+var xpathExpression = "(//head/title)[1]";
 
 /*var path = {
     "_parent" : "//div[contains(@id,'questions')]/div[contains(@class,'question-summary')]",
@@ -60,7 +53,5 @@ var url = "https://stackoverflow.com/questions/tagged/google-app-engine";
     }
 };*/
 
-var path = "string(//head/title[1]/text())";
 
-
-Scrapr.scrape(url, path).then(ng.log);
+Scrapr.scrape(currentPageURL, xpathExpression).then(function (titleNodes) { ng.log(titleNodes[0]); });

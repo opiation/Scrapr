@@ -1,4 +1,6 @@
 /*
+    require ("ng");
+
     Requires:
 
 
@@ -376,6 +378,4 @@
 
 
     exported.ajax = ajax;
-
-    return exported;
 }(ng));
